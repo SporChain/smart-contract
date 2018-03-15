@@ -87,6 +87,15 @@ contract Ownable {
 }
 
 /**
+* @dev Contract function to receive approval and execute function in one call
+* @dev Borrowed from MiniMeToken
+*/
+contract ApproveAndCallFallBack {
+    function receiveApproval(address from, uint256 tokens, address token, bytes data) public;
+}
+
+
+/**
  * @title ERC20Basic
  * @dev Simpler version of ERC20 interface
  * @dev see https://github.com/ethereum/EIPs/issues/179
@@ -107,6 +116,19 @@ contract ERC20 is ERC20Basic {
   function approve(address spender, uint256 value) public returns (bool);
   event Approval(address indexed owner, address indexed spender, uint256 value);
 }
+
+
+/**
+ * Token owner can approve for spender to transferFrom(...) tokens
+ * from the token owner's account. The spender contract function
+ * receiveApproval(...) is then executed
+  */
+    function approveAndCall(address spender, uint tokens, bytes data) public returns (bool success) {
+        allowed[msg.sender][spender] = tokens;
+        Approval(msg.sender, spender, tokens);
+        ApproveAndCallFallBack(spender).receiveApproval(msg.sender, tokens, this, data);
+        return true;
+    }
 
 /**
  * @title Basic token
